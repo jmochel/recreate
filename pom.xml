@@ -10,15 +10,15 @@
   <parent>
     <groupId>io.micronaut</groupId>
     <artifactId>micronaut-parent</artifactId>
-    <version>3.2.7</version>
+    <version>3.4.1</version>
   </parent>
 
   <properties>
     <packaging>jar</packaging>
     <jdk.version>17</jdk.version>
     <release.version>17</release.version>
-    <micronaut.version>3.2.7</micronaut.version>
-    <exec.mainClass>org.saltations.RecreateCmd</exec.mainClass>
+    <micronaut.version>3.4.1</micronaut.version>
+    <exec.mainClass>org.saltations.VIEApplication</exec.mainClass>
     <micronaut.runtime>netty</micronaut.runtime>
   </properties>
 

@@ -1,33 +1,28 @@
 package org.saltations;
 
-import java.io.File;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import com.google.common.base.StandardSystemProperty;
 import io.micronaut.configuration.picocli.PicocliRunner;
 
-import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 import static java.lang.System.out;
-import static org.saltations.RecreateCmd.PreferenceKey.TEMPLATE_ROOT_DIR;
+import static org.saltations.VIEApplication.PreferenceKey.TEMPLATE_ROOT_DIR;
 
 @Slf4j(topic = "recreate")
 @Command(name = "recreate", description = "...", mixinStandardHelpOptions = true,
-        subcommands = {RecreateCmd.ConfigCmd.class, RecreateCmd.GroupCmd.class, RecreateCmd.TemplateCmd.class})
-public class RecreateCmd implements Runnable
+        subcommands = {VIEApplication.ConfigCmd.class, VIEApplication.GroupCmd.class, VIEApplication.TemplateCmd.class})
+public class VIEApplication implements Runnable
 {
-    private static final Preferences prefs = Preferences.userNodeForPackage(RecreateCmd.class);
+    private static final Preferences prefs = Preferences.userNodeForPackage(VIEApplication.class);
 
     enum PreferenceKey
     {
@@ -56,7 +51,7 @@ public class RecreateCmd implements Runnable
 
     public static void main(String[] args) throws Exception
     {
-        PicocliRunner.run(RecreateCmd.class, args);
+        PicocliRunner.run(VIEApplication.class, args);
     }
 
     public void run()

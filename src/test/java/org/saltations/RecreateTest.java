@@ -24,7 +24,7 @@ class RecreateTest
         try (ApplicationContext ctx = ApplicationContext.run(Environment.CLI, Environment.TEST))
         {
             String[] args = new String[] { "-h" };
-            PicocliRunner.run(RecreateCmd.class, ctx, args);
+            PicocliRunner.run(VIEApplication.class, ctx, args);
 
             // demo
             assertTrue(baos.toString().contains("Usage: recreate"));
