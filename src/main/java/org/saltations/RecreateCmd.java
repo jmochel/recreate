@@ -1,5 +1,7 @@
 package org.saltations;
 
+import java.io.File;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +11,7 @@ import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import com.google.common.base.StandardSystemProperty;
 import io.micronaut.configuration.picocli.PicocliRunner;
 
 import jakarta.inject.Inject;
@@ -17,8 +20,9 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 import static java.lang.System.out;
+import static org.saltations.RecreateCmd.PreferenceKey.TEMPLATE_ROOT_DIR;
 
-@Slf4j
+@Slf4j(topic = "recreate")
 @Command(name = "recreate", description = "...", mixinStandardHelpOptions = true,
         subcommands = {RecreateCmd.ConfigCmd.class, RecreateCmd.GroupCmd.class, RecreateCmd.TemplateCmd.class})
 public class RecreateCmd implements Runnable
@@ -27,7 +31,7 @@ public class RecreateCmd implements Runnable
 
     enum PreferenceKey
     {
-        TEMPLATE_ROOT_DIR("template.store.root.folder", ".");
+        TEMPLATE_ROOT_DIR("template.store.root.folder", StandardSystemProperty.USER_HOME.value() + "/.recreate");
 
         PreferenceKey(String prefKey, String prefDefault)
         {
@@ -88,7 +92,14 @@ public class RecreateCmd implements Runnable
         @Override
         public void run()
         {
-            prefs.put(PreferenceKey.TEMPLATE_ROOT_DIR.prefKey, PreferenceKey.TEMPLATE_ROOT_DIR.prefDefault());
+            prefs.put(TEMPLATE_ROOT_DIR.prefKey, TEMPLATE_ROOT_DIR.prefDefault());
+
+            var rootFolder = Paths.get(prefs.get(TEMPLATE_ROOT_DIR.prefKey(),"")).toFile();
+
+            if (!rootFolder.exists())
+            {
+                rootFolder.mkdir();
+            }
 
             log.info("Successfully initialized");
         }
@@ -135,14 +146,65 @@ public class RecreateCmd implements Runnable
         }
     }
 
-
-    @Command(name = "group", description = "Manage groupings of templates", mixinStandardHelpOptions = true)
+    @Command(name = "group", description = "Manage groupings of templates", mixinStandardHelpOptions = true,  subcommands = {GroupListCmd.class, GroupCreateCmd.class})
     static class GroupCmd implements Runnable
     {
         @Override
         public void run()
         {
 
+        }
+    }
+
+    @Command(name = "list", description = "Lists current groupings", mixinStandardHelpOptions = true)
+    static class GroupListCmd implements Runnable
+    {
+        @Override
+        public void run()
+        {
+            var rootFolder = Paths.get(prefs.get(TEMPLATE_ROOT_DIR.prefKey(),"")).toFile();
+
+            var files = rootFolder.listFiles();
+
+            if (files == null)
+            {
+                log.info("No template groups exist");
+                return;
+            }
+
+            var directoryNames = Arrays.asList(files).stream()
+                    .filter(f -> f.isDirectory())
+                    .map(d -> d.getName())
+                    .collect(Collectors.toList());
+
+            if (directoryNames.isEmpty())
+            {
+                log.info("No template groups exist");
+                return;
+            }
+            else {
+                directoryNames.forEach(out::println);
+            }
+        }
+    }
+
+    @Command(name = "create", description = "Creates named group", mixinStandardHelpOptions = true)
+    static class GroupCreateCmd implements Runnable
+    {
+        @Option(names = {"-n","--name"}, description = "Name of the grouping to create", required = true)
+        private String groupName;
+
+        @Override
+        public void run()
+        {
+            var groupFolder = Paths.get(prefs.get(TEMPLATE_ROOT_DIR.prefKey(),""), groupName).toFile();
+
+            var created = groupFolder.mkdir();
+
+            if (!created)
+            {
+                log.error("Unable to create group {}. Unable to create folder {}", groupName, groupFolder.getPath());
+            }
         }
     }
 
